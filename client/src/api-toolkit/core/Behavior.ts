@@ -77,11 +77,14 @@ function combineT(...bs: Behavior<unknown>[]): any {
 const chain =
   <A, B>(f: (value: A) => Behavior<B>) =>
   (fa: Behavior<A>) => {
-    const newb: Behavior<B> = behavior.of(f(fa.get()).get());
+    const finalb = f(fa.get());
 
-    fa.subscribe((a) => newb.set(f(a).get()));
+    fa.subscribe((a) => {
+      const newb = f(a);
+      newb.subscribe((b) => finalb.set(b));
+    });
 
-    return newb;
+    return finalb;
   };
 
 export const behavior = { of, map, combineT, chain };

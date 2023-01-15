@@ -20,4 +20,11 @@ const uncache = <E, A>(rd: RemoteDataCached<E, A>): RemoteData<E, A> => {
   }
 };
 
-export const remoteDataCached = { uncache };
+export const mapSuccess =
+  <A, B>(f: (a: A) => B) =>
+  ({ data, isRefetching }: { data: A; isRefetching: boolean }) => ({
+    data: f(data),
+    isRefetching,
+  });
+
+export const remoteDataCached = { uncache, mapSuccess };

@@ -11,7 +11,7 @@ export type BehaviorRemoteDataCached<E, A> = Behavior<RemoteDataCached<E, A>>;
 type CacheEntry = {
   latestState: RemoteDataCached<unknown, unknown>;
   work: null | Promise<RemoteData<unknown, unknown>>;
-  query: Record<any, any>;
+  query: unknown;
   key: PropertyKey;
   tags: unknown[];
 };
@@ -161,10 +161,10 @@ export const makeApi = <
     const work = typedQueries[key].worker(query).then((rd) => {
       setCache(key, query, rd, {
         work: null,
-        query: query as any,
+        query,
         key,
         tags: typedQueries[key].provideTags
-          ? typedQueries[key].provideTags!(rd as any)
+          ? typedQueries[key].provideTags!(rd)
           : [],
       });
 
@@ -176,7 +176,7 @@ export const makeApi = <
 
     setCache(key, query, remoteData.pending, {
       work,
-      query: query as any,
+      query,
       key,
       tags: [],
     });

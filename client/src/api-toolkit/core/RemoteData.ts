@@ -143,5 +143,5 @@ export const remoteData = {
   fold,
   getOrElse,
   getOrElseN,
-  exists,
+  exists
 };

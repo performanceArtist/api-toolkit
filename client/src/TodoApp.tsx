@@ -1,8 +1,17 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Todo } from "./api/base";
 import { api } from "./api/api";
-import { useQuery, useMutation } from "./api-toolkit";
+import {
+  useQuery,
+  useMutation,
+  remoteData,
+  behavior,
+  pipe,
+  RemoteDataCached,
+  RemoteDataRenderer,
+} from "./api-toolkit";
 import { RemoteDataDefault } from "./shared/components/RemoteDataDefault";
+import "./cases";
 
 export function TodoApp() {
   const todos = useQuery(api.queries.getTodos(undefined));
@@ -56,6 +65,7 @@ export function TodoApp() {
         <button onClick={onAdd}>Add</button>
       </div>
       <Inner />
+      <LoadOnClick />
     </div>
   );
 }
@@ -80,5 +90,53 @@ const Inner = () => {
         </h2>
       )}
     />
+  );
+};
+
+const click = behavior.of<number | null>(null);
+
+const todoOnClick = pipe(
+  click,
+  behavior.chain((id) =>
+    id === null
+      ? behavior.of(remoteData.initial as RemoteDataCached<Error, Todo>)
+      : api.queries.getTodo(id)
+  )
+);
+
+const onRefetch = (data: { isRefetching: boolean }) =>
+  data.isRefetching ? <div>Refetching...</div> : null;
+
+const LoadOnClick = () => {
+  const todo = useQuery(todoOnClick);
+
+  return (
+    <div>
+      <button
+        onClick={() => {
+          const current = click.get();
+          current === null ? click.set(1) : click.set(current + 1);
+        }}
+      >
+        Load
+      </button>
+      <RemoteDataRenderer
+        data={todo}
+        onInitial={() => <div>Click to load</div>}
+        onError={(e) => (
+          <div>
+            Error
+            {onRefetch(e)}
+          </div>
+        )}
+        onPending={() => <div>Loading...</div>}
+        onSuccess={(todo) => (
+          <div>
+            {todo.data.text}
+            {onRefetch(todo)}
+          </div>
+        )}
+      />
+    </div>
   );
 };

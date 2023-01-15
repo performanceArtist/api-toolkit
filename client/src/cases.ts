@@ -11,8 +11,13 @@ import {
 
 const mapped = flow(
   api.queries.getTodos,
-  behaviorRemoteData.map(({ data }) =>
-    data.map(({ text }) => ({ text, textLength: text.length }))
+  behaviorRemoteData.map(
+    remoteDataCached.mapSuccess((data) =>
+      data.map(({ text }) => ({
+        text,
+        textLength: text.length,
+      }))
+    )
   )
 );
 

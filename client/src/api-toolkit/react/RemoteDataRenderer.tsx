@@ -1,18 +1,18 @@
 import { RemoteData } from "../core";
 import { ComponentType, memo } from "react";
 
-type RemoteDataRendererProps<T> = {
-  data: RemoteData<unknown, T>;
+type RemoteDataRendererProps<E, T> = {
+  data: RemoteData<E, T>;
   onInitial: () => JSX.Element;
   onSuccess: (result: T) => JSX.Element;
   onPending: () => JSX.Element;
-  onError: (error: Error) => JSX.Element;
+  onError: (error: E) => JSX.Element;
 };
 
 const memoId = memo as <E extends ComponentType<any>>(e: E) => E;
 
-export const RemoteDataRenderer = memoId(function <T>(
-  props: RemoteDataRendererProps<T>
+export const RemoteDataRenderer = memoId(function <E, T>(
+  props: RemoteDataRendererProps<E, T>
 ) {
   const { data, onSuccess, onError, onPending, onInitial } = props;
 
@@ -22,7 +22,7 @@ export const RemoteDataRenderer = memoId(function <T>(
     case "pending":
       return onPending();
     case "error":
-      return onError(new Error(String(data.error)));
+      return onError(data.error as any);
     case "success":
       return onSuccess(data.data);
   }
